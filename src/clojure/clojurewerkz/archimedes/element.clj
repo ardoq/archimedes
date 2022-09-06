@@ -1,6 +1,6 @@
 (ns clojurewerkz.archimedes.element
   (:refer-clojure :exclude [keys vals assoc! dissoc! get])
-  (:import [org.apache.tinkerpop.gremlin.structure Edge Element Vertex VertexProperty$Cardinality]))
+  (:import [org.apache.tinkerpop.gremlin.structure Element]))
 
 (defn get
   ([^Element elem key]
@@ -27,20 +27,18 @@
   ;;Important when using types. You aren't ever going to change a
   ;;user's id for example.
   (doseq [[key value] (partition 2 kvs)]
-    (let [value' (if (coll? value)
-                   ;; The Graph serialization likely doesn't support Clojure coll
-                   ;; classes but quite likely it does handle arrays
-                   (into-array Object value)
-                   value)]
-      (if (instance? Vertex elem)
-        (cond
-          (set? value)
-          (.property elem VertexProperty$Cardinality/set (name key) value' (to-array []))
-          (sequential? value)
-          (.property elem VertexProperty$Cardinality/list (name key) value' (to-array []))
-          :else
-          (.property elem VertexProperty$Cardinality/single (name key) value' (to-array [])))
-        (.property elem (name key) value'))))
+    (let [value' (cond ;; Turn Clojure classes into something more commonly handled
+                   (set? value)
+                   (java.util.HashSet. value)
+                   (sequential? value)
+                   (java.util.ArrayList. value)
+                   :else value)]
+      ;; NOTE If elem is Vertex and the Graph supports 
+      ;; o.a.t.g.structure.Graph.Features.VertexFeatures#FEATURE_MULTI_PROPERTIES
+      ;; then we could call Vertex.property(VertexProperty$Cardinality/list, key, (nth X value), ..)
+      ;; for each element. The problem then is reading - in `get` we can't see whether the
+      ;; property is single or list.
+      (.property elem (name key) value')))
   elem)
 
 (defn merge!
@@ -48,6 +46,8 @@
   (doseq [d maps]
     (apply assoc! elem (if (map? d)
                          (apply concat (into [] d))
+                         ;; Keep the old code, in case some old clients send
+                         ;; us non-maps:
                          (flatten (into [] d)))))
   elem)
 
@@ -65,3 +65,17 @@
 (defn clear!
   [^Element elem]
   (apply dissoc! (cons elem (keys elem))))
+
+(comment
+  ; lein try com.esotericsoftware/kryo 3.0.3 ; TinkerPop 3 uses Kryo
+  (clojure.core/import 
+    '(com.esotericsoftware.kryo Kryo)
+    '(com.esotericsoftware.kryo.io Input Output))
+  (def kryo (Kryo.))
+
+  (clojure.core/with-open [in (Input. (clojure.java.io/input-stream "out.bin"))]
+    (clojure.core/with-open [out (Output. (clojure.java.io/output-stream "out.bin"))]
+      (.writeClassAndObject kryo out (java.util.ArrayList. [1 2])))
+    (.readClassAndObject kryo in))
+
+  )

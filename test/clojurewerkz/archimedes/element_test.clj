@@ -25,14 +25,16 @@
 
 (deftest test-create-with-properties!
   (let [g (clean-tinkergraph)
-        a (v/create-with-id!  g 100 {:str "s", :num 1, :vec [1 2] :set #{"a" "b"}})
+        a (v/create-with-id!  g 100 {:str "s", :num 1, :v1 [1], :vec [1 2] :set #{"a" "b"}})
         v-map (v/to-map a)]
     (is (= {:str "s", :num 1}
            (select-keys v-map [:str :num])))
-    (is (java.util.Arrays/equals (into-array Object ["a" "b"]) (:set v-map))
-      "Clojure vectors are stored as Java arrays (for compatibility)")
-    (is (java.util.Arrays/equals (into-array Object [1 2]) (:vec v-map))
-      "Clojure sets are stored as Java arrays (for compatibility)")))
+    (is (= [1] (:v1 v-map))
+      "Clojure vectors is read as a Java List (single element)")
+    (is (= #{"a" "b"} (:set v-map))
+      "Clojure sets is read as a Java Set (multiple elements)")
+    (is (= [1 2] (:vec v-map))
+      "Clojure vectors is read as a Java List")))
 
 (deftest test-remove-property!
   (let [g (clean-tinkergraph)
