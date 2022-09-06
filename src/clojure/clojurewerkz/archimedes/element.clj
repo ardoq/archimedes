@@ -1,6 +1,6 @@
 (ns clojurewerkz.archimedes.element
   (:refer-clojure :exclude [keys vals assoc! dissoc! get])
-  (:import [org.apache.tinkerpop.gremlin.structure Element VertexProperty$Cardinality]))
+  (:import [org.apache.tinkerpop.gremlin.structure Edge Element Vertex VertexProperty$Cardinality]))
 
 (defn get
   ([^Element elem key]
@@ -27,15 +27,28 @@
   ;;Important when using types. You aren't ever going to change a
   ;;user's id for example.
   (doseq [[key value] (partition 2 kvs)]
-    (if (set? value)
-      (.property elem VertexProperty$Cardinality/set (name key) value (to-array []))
-      (.property elem (name key) value)))
+    (let [value' (if (coll? value)
+                   ;; The Graph serialization likely doesn't support Clojure coll
+                   ;; classes but quite likely it does handle arrays
+                   (into-array Object value)
+                   value)]
+      (if (instance? Vertex elem)
+        (cond
+          (set? value)
+          (.property elem VertexProperty$Cardinality/set (name key) value' (to-array []))
+          (sequential? value)
+          (.property elem VertexProperty$Cardinality/list (name key) value' (to-array []))
+          :else
+          (.property elem VertexProperty$Cardinality/single (name key) value' (to-array [])))
+        (.property elem (name key) value'))))
   elem)
 
 (defn merge!
   [^Element elem & maps]
   (doseq [d maps]
-    (apply assoc! (cons elem (flatten (into [] d)))))
+    (apply assoc! elem (if (map? d)
+                         (apply concat (into [] d))
+                         (flatten (into [] d)))))
   elem)
 
 (defn dissoc!

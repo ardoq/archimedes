@@ -19,9 +19,20 @@
   (let [g (clean-tinkergraph)
         a (v/create-with-id!  g 100)
         b (v/create-with-id!  g 101)
-        c (e/connect-with-id! g 102 a :label b )]
+        c (e/connect-with-id! g 102 a :label b)]
     (is (= java.lang.Integer (type (v/id-of a))))
     (is (= java.lang.Integer (type (e/id-of c))))))
+
+(deftest test-create-with-properties!
+  (let [g (clean-tinkergraph)
+        a (v/create-with-id!  g 100 {:str "s", :num 1, :vec [1 2] :set #{"a" "b"}})
+        v-map (v/to-map a)]
+    (is (= {:str "s", :num 1}
+           (select-keys v-map [:str :num])))
+    (is (java.util.Arrays/equals (into-array Object ["a" "b"]) (:set v-map))
+      "Clojure vectors are stored as Java arrays (for compatibility)")
+    (is (java.util.Arrays/equals (into-array Object [1 2]) (:vec v-map))
+      "Clojure sets are stored as Java arrays (for compatibility)")))
 
 (deftest test-remove-property!
   (let [g (clean-tinkergraph)
