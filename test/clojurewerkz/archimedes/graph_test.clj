@@ -3,8 +3,8 @@
   (:require [clojurewerkz.archimedes.graph :as g]
             [clojurewerkz.archimedes.vertex :as v]
             [clojurewerkz.support.io :as sio])
-  (:import  [com.tinkerpop.blueprints.impls.tg TinkerGraphFactory TinkerGraph]
-            [com.thinkaurelius.titan.core TitanFactory TitanGraph]
+  (:import  [org.apache.tinkerpop.gremlin.tinkergraph.structure TinkerGraph]
+            [com.thinkaurelius.titan.core TitanFactory]
             [org.apache.commons.io FileUtils]))
 
 (def ^:dynamic *graph*)
@@ -17,7 +17,7 @@
         (try
           (f)
           (finally
-            (.shutdown *graph*))))
+            (.close *graph*))))
       (finally
         (FileUtils/deleteQuietly tmp)))))
 

@@ -20,8 +20,8 @@
         a (v/create-with-id!  g 100)
         b (v/create-with-id!  g 101)
         c (e/connect-with-id! g 102 a :label b )]
-    (is (= java.lang.String (type (v/id-of a))))
-    (is (= java.lang.String (type (e/id-of c))))))
+    (is (= java.lang.Integer (type (v/id-of a))))
+    (is (= java.lang.Integer (type (e/id-of c))))))
 
 (deftest test-remove-property!
   (let [g (clean-tinkergraph)

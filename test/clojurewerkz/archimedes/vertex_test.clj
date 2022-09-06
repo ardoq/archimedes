@@ -48,7 +48,7 @@
       (let [graph (g/clean-tinkergraph)
             v1 (v/create-with-id! graph 100 {:name "v1" :a 1 :b 2 :c 3})
             props (v/to-map v1)]
-        (is (= "100" (props id)))
+        (is (= 100 (props id)))
         (is (= 1 (props :a)))
         (is (= 2 (props :b)))
         (is (= 3 (props :c))))

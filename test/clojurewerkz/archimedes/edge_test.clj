@@ -11,7 +11,7 @@
         a (e/connect-with-id! g 102 u :test w)
         a-id (e/id-of a)]
     (e/remove! g a)
-    (is (=  nil (e/find-by-id a-id)))))
+    (is (=  nil (e/find-by-id g a-id)))))
 
 (deftest test-connect
   (let [g (gr/clean-tinkergraph)
@@ -68,7 +68,7 @@
             v2 (v/create-with-id! g 101 {:name "v2"})
             edge (e/connect-with-id! g 102 v1 :test v2 {:a 1 :b 2 :c 3})
             prop-map (e/to-map edge)]
-      (is (= {:a 1 :b 2 :c 3 id "102" label :test}  prop-map)))
+      (is (= {:a 1 :b 2 :c 3 id 102 label :test}  prop-map)))
       (finally
         (gr/set-element-id-key! :__id__)
         (gr/set-edge-label-key! :__label__)))))
@@ -125,7 +125,7 @@
         edge (e/connect-with-id! g 102 v1 :connexion v2 )
         fresh-edge (e/refresh g edge)]
     (is fresh-edge)
-    (is (= (.getId edge) (.getId fresh-edge)))
+    (is (= (.id edge) (.id fresh-edge)))
     (is (= (e/to-map edge) (e/to-map fresh-edge)))))
 
 (deftest test-upconnect!
@@ -137,7 +137,7 @@
       (is (e/connected? v1 v2))
       (is (e/connected? v1 :connexion v2))
       (is (not (e/connected? v2 v1)))
-      (is (= 1 (count (seq (.getEdges g)))))))
+      (is (= 1 (count (iterator-seq (.edges g (to-array []))))))))
   (testing "Upconnecting once"
     (let [g    (gr/clean-tinkergraph)
           v1 (v/create-with-id! g 100 {:name "v1"})
@@ -148,7 +148,7 @@
       (is (e/connected? v1 :connexion v2))
       (is (not (e/connected? v2 v1)))
       (is (= "the edge" (e/get edge :name)))
-      (is (= 1 (count (seq (.getEdges g)))))))
+      (is (= 1 (count (iterator-seq (.edges g (to-array []))))))))
 
   (testing "Upconnecting multiple times"
     (let [g  (gr/clean-tinkergraph)
@@ -163,7 +163,7 @@
       (is (= "the edge" (e/get edge :name)))
       (is (= 1 (e/get edge :a)))
       (is (= 0 (e/get edge :b)))
-      (is (= 1 (count (seq (.getEdges g))))))))
+      (is (= 1 (count (iterator-seq (.edges g (to-array [])))))))))
 
 (deftest test-get-false-val
   (let [graph (gr/clean-tinkergraph)
