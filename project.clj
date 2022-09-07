@@ -1,4 +1,4 @@
-(defproject ardoq/archimedes "3.0.0.1"
+(defproject ardoq/archimedes "4.0.0"
   :description "Clojure wrapper for Tinkerpop Blueprints"
   :url "https://github.com/clojurewerkz/archimedes"
   :license {:name "Eclipse Public License"
@@ -15,7 +15,8 @@
                                      [commons-io/commons-io "2.4"]]}
              :1.5    {:dependencies [[org.clojure/clojure "1.5.1"]]}
              :1.7    {:dependencies [[org.clojure/clojure "1.7.0"]]}
-             :master {:dependencies [[org.clojure/clojure "1.8.0-master-SNAPSHOT"]]}}
+             :1.11    {:dependencies [[org.clojure/clojure "1.11.1"]]}
+             :master {:dependencies [[org.clojure/clojure "1.8.0"]]}}
   :aliases {"all" ["with-profile" "dev:dev,1.5:dev,1.7:dev,master"]}
   :repositories {"sonatype" {:url "http://oss.sonatype.org/content/repositories/releases"
                              :snapshots false

@@ -1,7 +1,8 @@
 (ns clojurewerkz.archimedes.graph
-  (:import (org.apache.tinkerpop.gremlin.structure Element Graph Graph$Features Graph$Features$GraphFeatures)
-           (org.apache.tinkerpop.gremlin.tinkergraph.structure TinkerFactory)
-           ))
+  (:import (org.apache.tinkerpop.gremlin.structure Element Graph Graph$Features 
+             Graph$Features$GraphFeatures
+             Graph$Features$VertexFeatures)
+           (org.apache.tinkerpop.gremlin.tinkergraph.structure TinkerFactory)))
 
 (def ^{:dynamic true} *element-id-key* :__id__)
 
@@ -41,6 +42,9 @@
 
 (defn supports-graph-feature [g s]
   (-> g (.features) (.supports Graph$Features$GraphFeatures s)))
+
+(defn supports-vertex-feature [g s]
+  (-> g (.features) (.supports Graph$Features$VertexFeatures s)))
 
 ;;TODO Transactions need to be much more fine grain in terms of
 ;;control. And expections as well. new-transaction will only work on a
